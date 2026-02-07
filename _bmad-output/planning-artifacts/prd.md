@@ -6,6 +6,12 @@ stepsCompleted:
   - step-04-journeys
   - step-05-domain
   - step-06-innovation
+  - step-07-project-type
+  - step-08-scoping
+  - step-09-functional
+  - step-10-nonfunctional
+  - step-11-polish
+  - step-12-complete
 inputDocuments:
   - '_bmad-output/planning-artifacts/product-brief-war-room-2026-02-05.md'
   - '_bmad-output/planning-artifacts/research/technical-nextjs-reactnative-expo-cross-platform-research-2026-02-05.md'
@@ -29,6 +35,18 @@ author: 'Vinicius'
 
 **Author:** Vinicius
 **Date:** 2026-02-05
+
+## Executive Summary
+
+**Product:** War Room — a visual multi-agent decision platform where AI agents with incompatible priorities deliberate problems on a spatial "Stage," make reasoning transparent through Activity Signals, and forge Named Conclusions through structured conflict.
+
+**Core Differentiator:** Epistemic resistance. War Room optimizes for credibility under pressure, not speed or coherence. Users witness decisions being forged — the visual layer IS the trust mechanism.
+
+**Target User (V1):** Alex — solo technical founder making irreversible decisions alone. Seed-stage, technically excellent, strategically isolated. Tired of paying the context tax to stateless AI tools.
+
+**Thesis:** Decisions feel earned when users see them survive genuine opposition. The switching cost is epistemic, not financial.
+
+**Timeline:** 6 weeks to launch. Visual Office is non-negotiable.
 
 ## Success Criteria
 
@@ -325,3 +343,307 @@ Build the irreducible kernel (Stage + Artifact + Manual Import) and get it in fr
 | Users don't import conclusions (manual friction too high) | Medium | V1 file cabinet with simple list selection. If import rate is low, investigate whether the mechanic or the UX is the bottleneck before adding automation. |
 | Competitors ship "debate mode" that captures 80% of value | Low | The 80% they capture is the performance. The 20% they can't is the commitment model — institutional memory, temporal gravity, decision lineage. That 20% is where all the retention lives. |
 | Engineered friction drives users away before they experience value | High | First session must deliver a "Bullet Dodge" moment within 5-10 minutes. If the friction payoff takes too long, users churn before the thesis can prove itself. |
+
+## SaaS B2B Platform Requirements
+
+### Architecture Philosophy
+
+**"Rocket ship, not cruise liner."** — V1 is a single-player experience for the solo technical founder. Every enterprise feature that doesn't serve Alex on Day 1 is deferred until paying customers demand it.
+
+### Multi-Tenancy Model
+
+| Tier | Model | Implementation |
+|------|-------|----------------|
+| **V1 (Free/Pro)** | Single-player | `user_id` only. No org structure, no invites, no shared workspaces. |
+| **V2 (Team)** | Multi-tenant shared | Row Level Security (RLS) in PostgreSQL. Logical isolation by `org_id`. Shared infrastructure. |
+| **Enterprise** | Dedicated (on demand) | Single-tenant isolation only for six-figure contracts. Not a V1 concern. |
+
+**V1 Scope**: Zero multi-tenancy code. If you're logged in, you own everything.
+
+### Permission Model
+
+| Tier | Model | Roles |
+|------|-------|-------|
+| **V1** | Binary | Authenticated = God mode. Create, delete, burn it down. |
+| **Team (Future)** | Role-based | Admin (billing/settings), Editor (run rooms), Observer (read-only Decision Graph) |
+
+**V1 Scope**: No RBAC. No permission checks beyond authentication. One user, one workspace, full control.
+
+### Integration Strategy
+
+| Tier | Approach | Details |
+|------|----------|---------|
+| **V1** | Magic Clipboard | Formatted copy button for Linear/Notion/Jira. Headers, checkboxes, structured markdown. Zero OAuth, zero API complexity. Feels like integration, costs nothing. |
+| **Pro** | Real Integrations | Jira API, GitHub API — conclusions push directly to external systems with lineage links. |
+| **Enterprise** | SSO + Custom | SAML/OIDC, API access for custom workflows, webhook subscriptions. |
+
+**V1 Scope**: Copy-to-clipboard with smart formatting. That's the integration layer.
+
+### Compliance & Security
+
+| Requirement | V1 | Future |
+|-------------|-----|--------|
+| **Encryption** | ✓ At rest + in transit (standard) | — |
+| **GDPR** | ✓ "Delete My Account" button | Data export, consent management |
+| **SOC 2** | ✗ Series A problem | Type II when enterprise sales require it |
+| **Audit Logs** | ✗ Deferred | Enterprise tier feature |
+| **Data Residency** | ✗ Deferred | EU hosting option for Enterprise |
+
+**V1 Scope**: Encryption defaults + account deletion. If a prospect asks for SOC 2 today, they're not our customer yet.
+
+### Platform Requirements (Cross-Platform)
+
+| Platform | V1 Target | Technology |
+|----------|-----------|------------|
+| **Web** | Primary | Next.js 15+ App Router, Vercel deployment |
+| **iOS** | Primary | Expo SDK 54+, React Native, App Store |
+| **Android** | Deferred | Expo supports it — trivial to add post-launch |
+
+**V1 Scope**: Web + iOS. Same codebase (monorepo), platform-specific renderers for the Stage.
+
+## Project Scoping & Phased Development
+
+### MVP Strategy & Philosophy
+
+**MVP Approach:** Problem-Solving MVP with Visual-First Constraint
+
+The thesis is that decisions feel earned when users *witness* them being forged. The visual office isn't a UI layer on top of deliberation — it IS the product. "Overseeing an organization" is the core feeling that separates War Room from every chat-based AI tool.
+
+**Non-Negotiable Anchor:** The Stage (Visual Office) ships in V1, no exceptions.
+
+**Timeline:** 6 weeks to launch.
+
+**Priority Hierarchy:** Visual Polish > Feature Completeness. If scope conflicts arise, cut features (Custom RAG, advanced integrations) before compromising the visual experience.
+
+### MVP Feature Set (Phase 1)
+
+**Core User Journey Supported:** Alex — Solo Founder's First War (Happy Path + Session 2 Aha Moment)
+
+**Must-Have Capabilities (The Irreducible Kernel):**
+
+| Feature | Why Non-Negotiable |
+|---------|-------------------|
+| **The Stage (Visual Office)** | Trust mechanism. Users must *see* agents deliberate. No Stage = no product. |
+| **Structured Multi-Agent Deliberation** | Role-bound disagreement is the core value. Agents hold incompatible positions. |
+| **Activity Signals** | Agents visibly think, stall, disagree, concede. The visual layer IS the credibility signal. |
+| **Async Text HITL** | User participates as constraint-setter, not commander. Minimum viable interaction. |
+| **Named Conclusion Artifacts** | Rooms produce first-class decision objects. Conclusions travel to file cabinet. |
+| **Manual Conclusion Import** | Session 2 depends on pulling prior conclusions into new rooms. Proves institutional memory. |
+| **Magic Clipboard Export** | Formatted copy for Linear/Notion. Zero OAuth complexity. |
+
+**Technical Fallback Strategy:**
+
+If high-fidelity Skia/PixiJS rendering proves too complex for 6-week timeline:
+- **Hard-Coded Visual Approach**: Simpler static pixel-art rooms with clever state changes
+- Agents physically move to "deliberation table" when room starts
+- State-driven animations (idle → thinking → speaking → conceding) over procedural animation
+- The office must *feel* alive through smart state transitions, even if not fully animated
+
+**Explicitly Deferred from MVP:**
+- Decision Triage UI / "Rejection Wizard"
+- Custom/User-Defined Agents
+- RAG-Grounded Agents
+- Full Persistent Agent Memory (beyond manual import)
+- Real API integrations (Jira/GitHub)
+- Multi-tenancy / Team features
+- Android
+
+### Post-MVP Features
+
+**Phase 2 — Growth (Post-Launch, Demand-Driven):**
+
+| Feature | Trigger to Build |
+|---------|-----------------|
+| Decision Triage UI | Impatient-user churn signal appears |
+| Custom Agents | Users hit generic agent ceiling, request Pro upsell |
+| Real Integrations (Jira/GitHub) | Conclusion Travel Rate plateaus — need execution bridge |
+| Persistent Agent Memory | Manual import proves value, users want automation |
+
+**Phase 3 — Expansion (Year 2+):**
+
+| Feature | Trigger to Build |
+|---------|-----------------|
+| Team/Multi-tenancy | Enterprise demand materializes with contracts |
+| Full Living Office | V1 Stage proves the spatial thesis, polish follows |
+| RAG-Grounded Agents | Pro users need situated deliberation |
+| Dependency Chains (Room DAG) | Decision Graph complexity requires it |
+| SSO/Enterprise Security | Six-figure contracts require it |
+
+### Risk Mitigation Strategy
+
+**Technical Risks:**
+
+| Risk | Severity | Mitigation |
+|------|----------|------------|
+| Stage rendering too complex for 6 weeks | High | Hard-Coded Visual fallback — static pixel-art with state-driven animations. Ship visual, polish later. |
+| Cross-platform parity (Web vs iOS) | Medium | Monorepo with shared canvas-core logic. Platform-specific renderers (PixiJS web, Skia mobile). Accept minor visual differences. |
+| Multi-agent orchestration complexity | Medium | Start with 2-3 agents max per room. Structured debate phases constrain chaos. |
+
+**Market Risks:**
+
+| Risk | Severity | Mitigation |
+|------|----------|------------|
+| "Epistemic resistance" feels like slowness | High | Activity Signals make cognitive load visible. Drag must feel like thinking, not buffering. First session delivers "Bullet Dodge" in 5-10 minutes. |
+| Users don't return for Session 2 | High | Primary success gate. If Session 2 Retention < 40%, thesis fails — investigate whether context tax relief isn't felt or conclusions don't carry weight. |
+| Competitors ship "debate mode" | Low | They copy performance, not commitment model. Moat is what happens *after* the room. |
+
+**Resource Risks:**
+
+| Risk | Severity | Mitigation |
+|------|----------|------------|
+| 6-week timeline too aggressive | Medium | Visual Office is the floor. Cut features before cutting visual quality. Magic Clipboard over real integrations. Manual import over automation. |
+| Solo founder capacity limits | Medium | Monorepo maximizes code sharing. Lean on Expo/Vercel managed infrastructure. No custom DevOps. |
+
+## Functional Requirements
+
+### Room Management
+
+- **FR1:** User can create a new deliberation room with a problem statement
+- **FR2:** User can view a list of all their rooms (active and completed)
+- **FR3:** User can open and re-enter any existing room
+- **FR4:** User can close/conclude a room when deliberation is complete
+- **FR5:** User can delete a room and its associated data
+- **FR6:** System recommends agent composition based on problem framing
+
+### Agent Deliberation
+
+- **FR7:** Agents hold distinct role-based positions (PM, Backend Architect, Frontend Lead, Skeptic)
+- **FR8:** Agents deliberate through structured phases (exploration → challenge → synthesis → convergence)
+- **FR9:** Agents maintain durable disagreement and resist premature convergence
+- **FR10:** Agents can challenge, question, and push back on other agents' positions
+- **FR11:** Agents can concede positions when presented with stronger arguments
+- **FR12:** Agents reference imported constraints when relevant to deliberation
+- **FR13:** System limits room to 2-4 agents per deliberation
+
+### Visual Experience (The Stage)
+
+*Note: FR14-FR19 are the trust mechanism. The Stage is how users witness reasoning being forged. These are non-negotiable.*
+
+- **FR14:** User views deliberation on a spatial "stage" where agents occupy distinct visual positions
+- **FR15:** Agents display as pixel-art characters with role-identifiable visual design
+- **FR16:** Agents show Activity Signals indicating current state (idle, thinking, speaking, stalled, disagreeing, conceding)
+- **FR17:** Agents physically transition between states (e.g., move to deliberation table when room starts)
+- **FR18:** Visual layer reflects cognitive load and deliberation progress
+- **FR19:** Stage renders consistently across web and iOS platforms
+
+### Human Participation (HITL)
+
+- **FR20:** User can submit text input during active deliberation
+- **FR21:** User input is tagged by type (constraint, preference, veto, open question)
+- **FR22:** Agents evaluate and respond to user input within deliberation
+- **FR23:** Agents can resist or push back on user input with reasoning
+- **FR24:** User can override agent objections with explicit acknowledgment
+- **FR25:** User retains final decision authority on room conclusions
+
+### Conclusions & Artifacts
+
+- **FR26:** Room produces a Named Conclusion artifact upon completion
+- **FR27:** Conclusion includes: earned recommendation with rationale
+- **FR28:** Conclusion includes: pros and cons with explicit tradeoffs
+- **FR29:** Conclusion includes: rejected alternatives and why eliminated
+- **FR30:** Conclusion includes: documented objections and minority positions
+- **FR31:** Conclusion includes: acknowledged risks and governing constraints
+- **FR32:** User can edit conclusion name and summary before finalizing
+- **FR33:** Conclusions are marked with creation date and source room
+
+### Institutional Memory
+
+- **FR34:** User can browse all past conclusions in a "file cabinet" view
+- **FR35:** User can search/filter conclusions by name, date, or content
+- **FR36:** User can select past conclusions to import into a new room as constraints
+- **FR37:** Imported conclusions are visible to agents and referenced in deliberation
+- **FR38:** System tracks decision lineage (which conclusions supersede others)
+- **FR39:** Superseded conclusions show link to newer conclusions
+
+### Export & Sharing
+
+- **FR40:** User can copy conclusion to clipboard with structured formatting (Magic Clipboard)
+- **FR41:** Clipboard export formats for Linear, Notion, and generic markdown
+- **FR42:** User can generate a shareable read-only link to a conclusion artifact
+- **FR43:** Non-users (Decision Consumers) can view shared artifacts without login
+- **FR44:** Shared artifacts display full reasoning trail, rejected alternatives, and minority positions
+
+### User Account & Workspace
+
+- **FR45:** User can sign up and authenticate via Clerk (email, OAuth)
+- **FR46:** User can sign out and sign back into their workspace
+- **FR47:** User can delete their account and all associated data (GDPR)
+- **FR48:** User workspace persists across web and iOS platforms
+- **FR49:** User can access their workspace from any device after authentication
+
+## Non-Functional Requirements
+
+### Performance
+
+**Visual Rendering:**
+- Stage rendering maintains ≥60fps on target devices (web: Chrome/Safari, iOS: iPhone 11+)
+- Activity Signal state transitions complete within 100ms (no perceptible lag)
+- Agent movement animations feel intentional, not janky
+
+**API & Backend:**
+- API response time (p95) < 200ms for all user-initiated actions
+- Time to Interactive (web) < 2s on 4G connection
+- App startup time (iOS) < 1.5s
+
+**Character-State Signals (Replaces Generic Loading):**
+- **API Latency:** Agents display "thinking" pose for normal delays; "tired" pose for extended waits (>3s)
+- **Context Load:** Agents show "sweat" or "overload" frames when processing heavy context windows
+- **Stalled Threads:** Agents display "blocked" state if reasoning hits a wall or needs user input
+- No spinners, no progress bars — the characters ARE the diagnostic layer
+- Technical limitations become visible cognitive weight, not UI chrome
+
+**Intentional Latency (Trust Mechanism):**
+- Deliberation pacing is *designed*, not performance-limited
+- Agent "thinking" pauses are engineered (500ms-2s) to signal cognitive load
+- Fast performance is invisible; slow *feels* intentional
+
+### Security
+
+**Data Protection:**
+- All data encrypted at rest (database) and in transit (HTTPS/TLS)
+- User authentication via Clerk with secure session management
+- Room and conclusion data isolated per user (no cross-user data access)
+
+**Compliance:**
+- GDPR: User can delete account and all associated data within 30 days
+- No sensitive data (payment, health) stored in V1 — compliance floor is low
+
+**Authentication:**
+- Clerk handles auth — email/password + OAuth (Google, GitHub)
+- Session tokens expire appropriately (Clerk defaults)
+- No password storage in application database
+
+### Reliability
+
+**Data Persistence:**
+- Room state persists across sessions — users can close browser and return
+- Conclusion artifacts are durable — no data loss on room completion
+- Cross-device sync: user's workspace accessible from web or iOS after auth
+
+**Graceful Degradation (Character-State Signals):**
+- If LLM API is slow: agents show "tired" or "sweating" — no error modals
+- If context window is heavy: agents visibly strain under cognitive load
+- If reasoning stalls: agents show "blocked" state, not generic error
+- Users see *why* the system is working hard, not just *that* it's working
+
+**Availability:**
+- Target 99.5% uptime (Vercel/Neon SLA baseline)
+- No silent data loss — errors surface to user with recovery options
+
+**Backup & Recovery:**
+- Database backups per Neon defaults (point-in-time recovery)
+- No user-facing backup/restore in V1 — infrastructure handles it
+
+### Accessibility
+
+**Core Constraint:** War Room is a visual product. The Stage (pixel-art agents, spatial deliberation) is the trust mechanism. Full accessibility would require an alternative non-visual mode, which is out of scope for V1.
+
+**V1 Accessibility Floor:**
+- Text chat transcript available alongside visual Stage
+- Conclusion artifacts are fully text-readable (no visual-only information)
+- Shareable links work with screen readers (artifact content is semantic HTML)
+- Color contrast meets WCAG AA for UI controls (buttons, forms)
+- Keyboard navigation for core actions (create room, submit input, copy clipboard)
+
+**Future Consideration:**
+- Audio/screen-reader mode for deliberation could expand market, but not V1
